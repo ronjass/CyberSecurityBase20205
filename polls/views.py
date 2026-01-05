@@ -1,8 +1,10 @@
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render
+from django.views.decorators.csrf import csrf_exempt
 from django.urls import reverse
 from django.utils import timezone
 from django.views import generic
+from django.db import connection
 
 from .models import Choice, Question
 
@@ -33,6 +35,18 @@ class ResultsView(generic.DetailView):
     model = Question
     template_name = 'polls/results.html'
 
+""" FLAW 1: SQL Injection """
+@csrf_exempt
+def vote(request, question_id):
+    choice_id = request.POST['choice']
+    with connection.cursor() as cursor:
+        cursor.execute(
+            f"UPDATE polls_choice SET votes = votes +1 WHERE id = {choice_id}"
+        )
+    return HttpResponseRedirect(reverse('polls:results', args=(question_id,)))
+
+""" FIX FLAW 1: SQL Injection
+# Not using @csrf_exempt
 def vote(request, question_id):
     question = get_object_or_404(Question, pk=question_id)
     try:
@@ -50,3 +64,4 @@ def vote(request, question_id):
         # with POST data. This prevents data from being posted twice if a
         # user hits the Back button.
         return HttpResponseRedirect(reverse('polls:results', args=(question.id,)))
+"""
