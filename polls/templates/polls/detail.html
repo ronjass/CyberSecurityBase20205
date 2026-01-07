@@ -14,3 +14,10 @@
 {% endfor %}
 <input type="submit" value="Vote">
 </form>
+<!-- FIX FLAW 2: add check that a user is staff -> if not, delete button is not shown
+    {# {% if user.is_staff %} #}-->
+<form action="{% url 'polls:delete' question.id %}" method="post">
+    {% csrf_token %}
+    <input type="submit" value="Delete Question">
+</form>
+<!--{# {% endif %} #}-->

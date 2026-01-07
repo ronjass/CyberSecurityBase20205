@@ -1,4 +1,5 @@
-from django.http import HttpResponse, HttpResponseRedirect
+from django.contrib.auth.decorators import login_required
+from django.http import HttpResponse, HttpResponseRedirect, HttpResponseForbidden
 from django.shortcuts import get_object_or_404, render
 from django.views.decorators.csrf import csrf_exempt
 from django.urls import reverse
@@ -64,4 +65,20 @@ def vote(request, question_id):
         # with POST data. This prevents data from being posted twice if a
         # user hits the Back button.
         return HttpResponseRedirect(reverse('polls:results', args=(question.id,)))
+"""
+
+""" FLAW 2: Broken Access Control """
+def delete_question(request, question_id):
+    question = get_object_or_404(Question, pk=question_id)
+    question.delete()
+    return HttpResponseRedirect(reverse('polls:index'))
+
+""" FIX FLAW 2: Broken Access Control
+@login_required
+def delete_question(request, question_id):
+    question = get_object_or_404(Question, pk=question_id)
+    if not request.user.is_staff:
+        return HttpResponseForbidden("You are not allowed to delete this question.")
+    question.delete()
+    return HttpResponseRedirect(reverse('polls:index'))
 """
