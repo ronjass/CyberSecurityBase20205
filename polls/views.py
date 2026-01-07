@@ -46,8 +46,8 @@ def vote(request, question_id):
         )
     return HttpResponseRedirect(reverse('polls:results', args=(question_id,)))
 
-""" FIX FLAW 1: SQL Injection
-# Not using @csrf_exempt
+""" FIX FLAW 1: SQL Injection: Delete the function above, including the @csrf_exempt 
+    and add the function below
 def vote(request, question_id):
     question = get_object_or_404(Question, pk=question_id)
     try:
@@ -73,7 +73,7 @@ def delete_question(request, question_id):
     question.delete()
     return HttpResponseRedirect(reverse('polls:index'))
 
-""" FIX FLAW 2: Broken Access Control
+""" FIX FLAW 2: Broken Access Control: Delete the function above and add the function below
 @login_required
 def delete_question(request, question_id):
     question = get_object_or_404(Question, pk=question_id)
