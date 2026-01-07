@@ -37,17 +37,27 @@ class ResultsView(generic.DetailView):
     template_name = 'polls/results.html'
 
 """ FLAW 1: SQL Injection """
+""" FLAW 4: Identification and Authentication Failures """
 @csrf_exempt
 def vote(request, question_id):
     choice_id = request.POST['choice']
+    """ FIX FLAW 4: add the two lines below
+    if request.session.get('voted_' + str(question_id)):
+        return HttpResponseForbidden("You have already voted.")
+    """
     with connection.cursor() as cursor:
         cursor.execute(
             f"UPDATE polls_choice SET votes = votes +1 WHERE id = {choice_id}"
         )
+    """ FIX FLAW 4: add the line below
+    request.session['voted_' + str(question_id)] = True
+    """
     return HttpResponseRedirect(reverse('polls:results', args=(question_id,)))
 
 """ FIX FLAW 1: SQL Injection: Delete the function above, including the @csrf_exempt 
-    and add the function below
+    and add the function below.
+    This function also includes the FIX for FLAW 4: Identification and Authentication Failures.
+
 def vote(request, question_id):
     question = get_object_or_404(Question, pk=question_id)
     try:
@@ -59,11 +69,15 @@ def vote(request, question_id):
             'error_message': "You didn't select a choice.",
         })
     else:
+        if request.session.get('voted_' + str(question_id)):
+            return HttpResponseForbidden("You have already voted.")
+        
         selected_choice.votes += 1
         selected_choice.save()
         # Always return an HttpResponseRedirect after successfully dealing
         # with POST data. This prevents data from being posted twice if a
         # user hits the Back button.
+        request.session['voted_' + str(question_id)] = True
         return HttpResponseRedirect(reverse('polls:results', args=(question.id,)))
 """
 
