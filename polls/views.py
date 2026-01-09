@@ -9,6 +9,10 @@ from django.db import connection
 
 from .models import Choice, Question
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 class IndexView(generic.ListView):
     template_name = 'polls/index.html'
     context_object_name = 'latest_question_list'
@@ -56,7 +60,7 @@ def vote(request, question_id):
 
 """ FIX FLAW 1: SQL Injection: Delete the function above, including the @csrf_exempt 
     and add the function below.
-    This function also includes the FIX for FLAW 4: Identification and Authentication Failures.
+    This function also includes the FIX for FLAW 4.
 
 def vote(request, question_id):
     question = get_object_or_404(Question, pk=question_id)
@@ -82,17 +86,28 @@ def vote(request, question_id):
 """
 
 """ FLAW 2: Broken Access Control """
+""" FLAW 5: Security Logging and Monitoring Failures """
+""" FIX FLAW 2: Broken Access Control: Add @login_required decorator
+@login_required """
 def delete_question(request, question_id):
     question = get_object_or_404(Question, pk=question_id)
-    question.delete()
-    return HttpResponseRedirect(reverse('polls:index'))
-
-""" FIX FLAW 2: Broken Access Control: Delete the function above and add the function below
-@login_required
-def delete_question(request, question_id):
-    question = get_object_or_404(Question, pk=question_id)
+    """ FIX FLAW 2: Add the if statement below
     if not request.user.is_staff:
+    """
+    """ FIX FLAW 5: Add the logging line below
+        logger.warning(
+            f"Unauthorized delete attempt by user {request.user.username} on question {question_id}"
+        )
+    """
+    """ FIX FLAW 2: Add the return line below
         return HttpResponseForbidden("You are not allowed to delete this question.")
+    """
     question.delete()
+
+    """ FIX FLAW 5: Add the logging line below 
+    logger.info(
+        f"Poll {question_id} deleted by user {request.user}"
+    )
+    """
+
     return HttpResponseRedirect(reverse('polls:index'))
-"""
