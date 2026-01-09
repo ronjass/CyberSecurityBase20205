@@ -9,9 +9,11 @@ from django.db import connection
 
 from .models import Choice, Question
 
+""" FLAW 5: Add logging import and logger setup
 import logging
 
 logger = logging.getLogger(__name__)
+"""
 
 class IndexView(generic.ListView):
     template_name = 'polls/index.html'
