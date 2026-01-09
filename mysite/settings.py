@@ -121,6 +121,7 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 
+""" FIX FLAW 5: Add logging configuration
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
@@ -134,3 +135,4 @@ LOGGING = {
         'level': 'INFO',
     },
 }
+"""
